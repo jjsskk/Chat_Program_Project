@@ -1,6 +1,6 @@
 # Chat_Program_Project
 
-- This program is an chat program made with Boost Library based cpp. 
+- This program is an chat program made with Boost Library based on cpp. 
 
 - [Boost.Asio Overview](https://www.boost.org/doc/libs/1_81_0/doc/html/boost_asio/overview.html)
 
