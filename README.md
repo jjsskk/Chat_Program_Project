@@ -8,11 +8,18 @@
 
 - Ubuntu(Linux) environment is required. 
 
-- Installation required : `g++(std=c++11)`, `boost library`
+- Installation required : `g++(std=c++11)`, `boost library`, `cmake`
+
+```
+kho@kho-desktop:~/cpp$ cmake -version
+cmake version 3.28.1
+
+CMake suite maintained and supported by Kitware (kitware.com/cmake).
+```
 
 - [boost_1_81_0.tar.gz download](https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz)
 
-- You can also use makefile to compile
+- use makefile to compile
 
 - When a client connects to the server, the server displays a list of currently running chat rooms to the client.
 
@@ -40,11 +47,13 @@
 
 
 ```
-g++ -std=c++11 chat_server.cpp -o chat_server -lboost_system -pthread
-```
+mkdir build && cd build 
+cmake .. 
+nproc # 자신 시스템의 코어 수 확인
 
-```
-g++ -std=c++11 chat_client.cpp -o chat_client -lboost_system -pthread
+# build (modify the core number '12' after option -j accordingly)
+make -j4 # 자신 시스템 코어 수에 맞게 -j 다음의 숫자를 변경
+cd bin
 ```
 
 ```
