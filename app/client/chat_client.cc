@@ -5,36 +5,9 @@
 #include <boost/asio.hpp>
 
 using boost::asio::ip::tcp;
-#define BUF_SIZE 100
-#define NAME_SIZE 20
-#define FILE_SIZE 500
+#include "globalVariable.h"
 
-struct packet
-{
-  short type;
-  char client_id[NAME_SIZE];
-  char selected_roomname[NAME_SIZE];
-  int selected_room_id;
-  char msg[BUF_SIZE];
-  char all_name[BUF_SIZE]; // used both in all room name and in all user name
-  char all_room_id[BUF_SIZE];
-  short file_transfer_check;
-  char file_name[NAME_SIZE];
-  int file_size;
-  char file_content[FILE_SIZE];
-  int end_read_size;
-  int port;
-};
-std::mutex mtx_list;
-std::mutex mtx_room;
-std::mutex mtx_file;
-// std::mutex mtx_room_out;
-int list = 0;
-int room = 0;
-int file = 0;
-
-#include "chat_session_client.hpp"
-#include "chat_session_client.cpp"
+#include "chat_session_client.h"
 
 using work_guard_type = boost::asio::executor_work_guard<boost::asio::io_service::executor_type>;
 
@@ -56,10 +29,6 @@ int main(int argc, char *argv[])
     chat_session c(io_service, endpoint_iterator, argv[3], argv[1], argv[2]);
     std::thread t([&io_service]()
                   { io_service.run(); });
-    //  std::thread t2([&io_service](){ io_service.run(); });
-    // io_service.run();
-    // std::cout<<"thread "<<std::endl;
-    // struct packet *pkt_ =(struct packet*) malloc(sizeof(struct packet));
 
     while (1)
     {

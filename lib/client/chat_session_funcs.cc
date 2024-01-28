@@ -1,3 +1,101 @@
+#include "chat_session_client.h"
+
+chat_session::chat_session(boost::asio::io_service &io_service,
+             tcp::resolver::iterator endpoint_iterator, std::string client_id, std::string host, std::string port)
+    : io_service_(io_service),
+      socket_(io_service), client_id_(client_id), host_(host), port_(port)
+{
+  do_connect(endpoint_iterator);
+}
+chat_session::~chat_session()
+{
+  free(pkt_read);
+  socket_.close();
+}
+
+void chat_session::close()
+{
+  io_service_.post([this]()
+                   { socket_.close(); });
+}
+
+void chat_session::file_upload(int thread_port)
+{
+
+  struct packet *pkt_file = (struct packet *)malloc(sizeof(struct packet));
+  ;
+  int read_cnt = 0;
+  int file_size = 0;
+
+  while (1)
+  {
+    read_cnt = fread((void *)(pkt_file->file_content), 1, FILE_SIZE, fp);
+    file_size += read_cnt;
+    if (read_cnt < FILE_SIZE)
+    {
+      memset(pkt_file->file_content, 0, FILE_SIZE);
+      pkt_file->file_size = file_size;
+      break;
+    }
+  }
+  fclose(fp);
+  fp = fopen(file_name_, "rb");
+  sleep(2);
+  boost::asio::io_service ioservice;
+  tcp::socket socket(ioservice);
+  tcp::resolver resolver(ioservice);
+  tcp::resolver::query q{host_, std::to_string(thread_port + 10000)};
+  try
+  {
+
+    connect(socket, resolver.resolve(q));
+    printf("port:%d", thread_port);
+
+    socket.write_some(boost::asio::buffer(pkt_file, sizeof(struct packet)));
+    char file[FILE_SIZE]; // file transfer in struct cause data loss so i use char array for only file data
+    file_size = 0;
+    while (1)
+    {
+      pkt_file->end_read_size = -1;
+      pkt_file->type = 3;
+      read_cnt = fread((void *)(file), 1, FILE_SIZE, fp);
+      file_size += read_cnt;
+      // if(file_size%1024==0)
+      // printf("send %d bytes \n",read_size);
+      if (read_cnt < FILE_SIZE)
+      {
+        pkt_file->type = 3;
+        pkt_file->end_read_size = read_cnt;
+        socket.write_some(boost::asio::buffer(file, read_cnt));
+        break;
+      }
+      socket.write_some(boost::asio::buffer(file, FILE_SIZE));
+    }
+    socket.shutdown(tcp::socket::shutdown_send);
+
+    socket.read_some(boost::asio::buffer(file, read_cnt));
+    printf("readread!!\n");
+  }
+  catch (std::exception &e)
+  {
+    std::cerr << "upload shutdown:  " << e.what() << "\n";
+    socket.close();
+  }
+  socket.close();
+  fclose(fp);
+  fp = NULL;
+  std::cout << "file upload done" << std::endl;
+
+  memset(pkt_file->file_name, 0, NAME_SIZE);
+  memset(pkt_file->client_id, 0, NAME_SIZE);
+  strcpy(pkt_file->file_name, file_name_);
+  strcpy(pkt_file->client_id, client_id_.c_str());
+  pkt_file->type = 4;
+
+  write(*pkt_file);
+  free(pkt_file);
+  pkt_file = NULL;
+}
 void chat_session::write(struct packet &msg)
 {
   io_service_.post(
@@ -53,7 +151,6 @@ void chat_session::display_roomlist()
       it++;
     }
   }
-
 }
 int chat_session::userinput_in_roomlist() // main thread execute this method
 {
@@ -79,9 +176,8 @@ int chat_session::userinput_in_roomlist() // main thread execute this method
       printf("enter room name : ");
       std::cin.getline(line, 20);
 
-
       std::cout << "Selectd room :" << line << std::endl;
-      
+
       selectd_room_.clear();
       selectd_room_.append(line);
       memset(&pkt_write, 0, sizeof(struct packet));
