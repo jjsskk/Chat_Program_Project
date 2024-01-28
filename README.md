@@ -19,7 +19,7 @@ CMake suite maintained and supported by Kitware (kitware.com/cmake).
 
 - [boost_1_81_0.tar.gz download](https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz)
 
-- use makefile to compile
+- use cmake to compile
 
 - When a client connects to the server, the server displays a list of currently running chat rooms to the client.
 
