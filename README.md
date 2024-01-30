@@ -10,7 +10,7 @@
 
 - Ubuntu(Linux) environment is required. 
 
-- Installation required : `g++(std=c++11)`, `boost library`, `cmake`
+- Installation required : `g++`, `cmake`
 
 ```
 kho@kho-desktop:~/cpp$ cmake -version
