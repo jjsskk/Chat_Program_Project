@@ -29,7 +29,7 @@ CMake suite maintained and supported by Kitware (kitware.com/cmake).
 
 - A client can create a new chat room, and when a new room is created, a new room list is delivered to clients who have not yet entered the room
 
-- A file held by any one client can be sent to all clients participating in the chat room. 
+- Clients in a room can send files they own to clients participating in the same room.
 
 - When a file is uploaded to the server, the server asks the clients participating in the chat room whether they want to receive the file, and sends the file only to those who want to receive it.
 
