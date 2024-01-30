@@ -1,5 +1,7 @@
 # Chat_Program_Project
 
+## Project Introduction
+
 - This program is an chat program made with Boost Library based on cpp. 
 
 - [Boost.Asio Overview](https://www.boost.org/doc/libs/1_81_0/doc/html/boost_asio/overview.html)
@@ -17,9 +19,7 @@ cmake version 3.28.1
 CMake suite maintained and supported by Kitware (kitware.com/cmake).
 ```
 
-- [boost_1_81_0.tar.gz download](https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz)
-
-- use cmake to compile
+## Program Features
 
 - When a client connects to the server, the server displays a list of currently running chat rooms to the client.
 
@@ -46,13 +46,22 @@ CMake suite maintained and supported by Kitware (kitware.com/cmake).
 - [C++11 chat Examples](https://www.boost.org/doc/libs/1_78_0/doc/html/boost_asio/examples/cpp11_examples.html)
 
 
+## Build and Run the project
+
+- use cmake to build project
+
+- If boost library installed with FetchContent does not work well, You will need to install the boost library yourself system-wide.
+
+- [boost_1_81_0.tar.gz download](https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz)
+
+
 ```
 mkdir build && cd build 
 cmake .. 
-nproc # 자신 시스템의 코어 수 확인
+nproc # check the number of core on your computer
 
-# build (modify the core number '12' after option -j accordingly)
-make -j4 # 자신 시스템 코어 수에 맞게 -j 다음의 숫자를 변경
+# build (modify the core number '4' after option -j accordingly)
+make -j4 # 
 cd bin
 ```
 
