@@ -35,9 +35,9 @@ CMake suite maintained and supported by Kitware (kitware.com/cmake).
 
 - Clients can send and receive conversations while files are being transferred.
 
-- The server run based on Boost.Asio as a whole
+- The server run based on Boost.Asio as a whole without creating new thread.
 
-- Thread is only used to upload files to the server
+- Only when uploading a file to the server, the task of transmitting the file to the server on a new socket is assigned to a new thread.
 
 - See the guideline for detailed explanations with screenshots.
 
