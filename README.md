@@ -61,7 +61,7 @@ cmake ..
 nproc # check the number of core on your computer
 
 # build (modify the core number '4' after option -j accordingly)
-make -j4 # 
+make -j4
 cd bin
 ```
 
