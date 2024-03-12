@@ -1,18 +1,18 @@
 #include "chat_session_client.h"
 
-void ChatSession::do_connect(tcp::resolver::iterator endpoint_iterator)
+void ChatSession::DoConnect(tcp::resolver::iterator endpoint_iterator)
 {
     boost::asio::async_connect(socket_, endpoint_iterator,
                                [this](boost::system::error_code ec, tcp::resolver::iterator)
                                {
                                    if (!ec)
                                    {
-                                       do_read();
+                                       DoRead();
                                    }
                                });
 }
 
-void ChatSession::do_read()
+void ChatSession::DoRead()
 { //// be careful that you use async_read!! -> this method only read buffer when buffer filled by write data .if otherwise, don't read
     boost::asio::async_read(socket_,
                             boost::asio::buffer(pkt_read, sizeof(struct packet)),
@@ -26,16 +26,16 @@ void ChatSession::do_read()
                                         if (room == 1)
                                         {
                                             memset(pkt_read, 0, sizeof(struct packet));
-                                            do_read();
+                                            DoRead();
                                         }
                                         else
                                         {
                                             if (list == 1)
-                                                display_roomlist();
+                                                DisplayRoomList();
                                             mtx_list.lock();
                                             list = 1;
                                             mtx_list.unlock();
-                                            do_read();
+                                            DoRead();
                                         }
                                     }
                                     else if (pkt_read->type == 1) // client enter room and read all username
@@ -47,7 +47,7 @@ void ChatSession::do_read()
                                         mtx_room.lock();
                                         room = 1;
                                         mtx_room.unlock();
-                                        do_read();
+                                        DoRead();
                                     }
                                     else if (pkt_read->type == 2) // clint enter room and read new client name
                                     {
@@ -56,13 +56,13 @@ void ChatSession::do_read()
                                         // mtx_room.lock();
                                         // room = 1;
                                         // mtx_room.unlock();
-                                        do_read();
+                                        DoRead();
                                     }
                                     else if (pkt_read->type == 3) // client read msg from server
                                     {
                                         // if(strcmp(pkt_read->client_id,client_id_.c_str()))
                                         std::cout << "[" << pkt_read->client_id << "] : " << pkt_read->msg << std::endl;
-                                        do_read();
+                                        DoRead();
                                     }
                                     else if (pkt_read->type == 4) // client read msg about whether he want to receive file from server
                                     {
@@ -71,7 +71,7 @@ void ChatSession::do_read()
                                         strcpy(file_name_, pkt_read->file_name);
                                         printf("!!!'%s' want to transfer file '%s' to you.\n!!!If you want to receive this file, please input #y(#Y) or otherwise, input #n(#N)\n", pkt_read->client_id, pkt_read->file_name);
                                         // pkt_read->type = 4;
-                                        do_read();
+                                        DoRead();
                                     }
                                     else if (pkt_read->type == 5) // client said 'yes' read file from sever
                                     {
@@ -92,13 +92,13 @@ void ChatSession::do_read()
                                         }
 
                                         // pkt_read->type = 4;
-                                        do_read();
+                                        DoRead();
                                     }
                                     else if (pkt_read->type == 6) // cliet read client info leaved this room
                                     {
                                         // if(strcmp(pkt_read->client_id,client_id_.c_str()))
                                         std::cout << pkt_read->client_id << " has left this room." << std::endl;
-                                        do_read();
+                                        DoRead();
                                     }
                                 }
                                 else
@@ -111,7 +111,7 @@ void ChatSession::do_read()
                             });
 }
 
-void ChatSession::do_write()
+void ChatSession::DoWrite()
 {
     boost::asio::async_write(socket_,
                              boost::asio::buffer(&(write_msgs_.front()), sizeof(struct packet)),
@@ -122,7 +122,7 @@ void ChatSession::do_write()
                                      write_msgs_.pop_front();
                                      if (!write_msgs_.empty())
                                      {
-                                         do_write();
+                                         DoWrite();
                                      }
                                  }
                                  else

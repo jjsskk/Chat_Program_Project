@@ -17,21 +17,21 @@ public:
                tcp::resolver::iterator endpoint_iterator, std::string client_id, std::string host, std::string port);
   ~ChatSession();
 
-  void write(struct packet &msg);
+  void Write(struct packet &msg);
 
-  int userinput_in_roomlist(); // main thread execute this method
-  void display_roomlist();
-  void do_communicate_in_room();
+  int UserinputInRoomList(); // main thread execute this method
+  void DisplayRoomList();
+  void DoCommunicateInRoom();
 
-  void close();
+  void Close();
 
-  void file_upload(int thread_port);
+  void FileUpload(int thread_port);
 
 private:
-  void do_connect(tcp::resolver::iterator endpoint_iterator);
+  void DoConnect(tcp::resolver::iterator endpoint_iterator);
 
-  void do_read();
-  void do_write();
+  void DoRead();
+  void DoWrite();
 
 private:
   boost::asio::io_service &io_service_;

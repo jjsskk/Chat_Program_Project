@@ -4,7 +4,7 @@ ChatSession::ChatSession(boost::asio::io_service &io_service, tcp::socket socket
     : io_service_(io_service), socket_(std::move(socket)), port_(port),
       roomlist_(roomlist)
 {
-    // start();
+    // Start();
 }
 ChatSession::~ChatSession()
 {
@@ -13,16 +13,15 @@ ChatSession::~ChatSession()
     std::cout << "ChatSession terminated" << std::endl;
 }
 
-void ChatSession::start()
+void ChatSession::Start()
 {
 
-    make_roomlist();
-    deliver(*pkt_);
-    do_read();
-    // do_read_room();
-    //  std::make_shared<ChatSession>(std::move(socket_), room_)->start();
+    MakeRoomList();
+    Deliver(*pkt_);
+    DoRead();
+    //  std::make_shared<ChatSession>(std::move(socket_), room_)->Start();
 }
-void ChatSession::leave()
+void ChatSession::Leave()
 {
     // to_do remove ChatRoom in roomlist
 
@@ -30,15 +29,15 @@ void ChatSession::leave()
         [this]()
         {
             printf("restart\n");
-            start();
+            Start();
         });
 }
-struct packet *ChatSession::getPacket()
+struct packet *ChatSession::GetPacket()
 {
     return pkt_;
 }
 
-void ChatSession::deliver(struct packet &msg) // 채팅방 안 모든 유저에게 read받은 msg 전송
+void ChatSession::Deliver(struct packet &msg) // 채팅방 안 모든 유저에게 read받은 msg 전송
 {
     // fflush(stdout);
     printf("parcipant deliver :%s\n", msg.all_name);
@@ -46,18 +45,18 @@ void ChatSession::deliver(struct packet &msg) // 채팅방 안 모든 유저에�
     bool write_in_progress = !write_msgs_.empty();
     write_msgs_.push_back(msg); // 전송할 msg(read받은 msg) 저장
     std::cout << write_in_progress << std::endl;
-    if (!write_in_progress) // write_in progress =true(do_write()진행중) = write_msgs가 비어있지 않음
+    if (!write_in_progress) // write_in progress =true(DoWrite()진행중) = write_msgs가 비어있지 않음
     {
         // printf("hell2\n");
-        do_write();
+        DoWrite();
     }
     // main thread 1개 기준으로 코드 짜짐
-    // read가 msg가 들어 올때 마다 위의 deliver()가 호출된다. 만약 do_write() 진행을
-    //  다 마지치 못한 상황에서 비동기 read의 handler 호출로 현재 deliver()가 호출되면
-    // do_write()진행을 못마치고 온 상태라서 (write_in progress =true) do_write()를 다시 호출 못하게 막는다 (대신에 write_msgs_에 못보낸 read msg를 차곡차곡 쌓음)
-    // 그후 아까 중단됬던 do_Write를 다시 진행해서 write_msgs큐(그동안 못보낸 read msg가  큐에계속 쌓임)를 모두 보내서 모두 비우면 다시 read했을때 do_write()한다
+    // read가 msg가 들어 올때 마다 위의 Deliver()가 호출된다. 만약 DoWrite() 진행을
+    //  다 마지치 못한 상황에서 비동기 read의 handler 호출로 현재 Deliver()가 호출되면
+    // DoWrite()진행을 못마치고 온 상태라서 (write_in progress =true) DoWrite()를 다시 호출 못하게 막는다 (대신에 write_msgs_에 못보낸 read msg를 차곡차곡 쌓음)
+    // 그후 아까 중단됬던 DoWrite를 다시 진행해서 write_msgs큐(그동안 못보낸 read msg가  큐에계속 쌓임)를 모두 보내서 모두 비우면 다시 read했을때 DoWrite()한다
 }
-void ChatSession::make_roomlist()
+void ChatSession::MakeRoomList()
 {
     namelist_.clear();
     idlist_.clear();
@@ -66,9 +65,9 @@ void ChatSession::make_roomlist()
     for (auto room : roomlist_)
     {
 
-        namelist_ += room->getroomname();
+        namelist_ += room->GetRoomName();
         namelist_ += "/";
-        idlist_ += std::to_string(room->getroomid());
+        idlist_ += std::to_string(room->GetRoomId());
         idlist_ += "/";
     }
     if (roomlist_.empty())
@@ -83,7 +82,7 @@ void ChatSession::make_roomlist()
     pkt_->type = 0; // send room list to corrsponding client
 }
 
-void ChatSession::do_create_room()
+void ChatSession::DoCreateRoom()
 {
     std::string name(pkt_->selected_roomname);
     std::shared_ptr<ChatRoom> ptr =
@@ -91,56 +90,56 @@ void ChatSession::do_create_room()
     roomlist_.push_back(ptr);
     current_room_ = ptr;
     std::string client_id(pkt_->client_id);
-    roomlist_.back()->join_user(client_id, shared_from_this()); // save client_id and socket in room
+    roomlist_.back()->JoinUser(client_id, shared_from_this()); // save client_id and socket in room
                                                                 //  memset(pkt_->client_id,0,NAME_SIZE);
     pkt_->type = 2;
     // strcpy(pkt_->client_id,client_id_.c_str());
-    roomlist_.back()->deliver(*pkt_); // send new client name to all member in room ->print that 000 has joined in the room of all clients cmd
+    roomlist_.back()->Deliver(*pkt_); // send new client name to all member in room ->print that 000 has joined in the room of all clients cmd
     memset(pkt_->all_name, 0, BUF_SIZE);
     pkt_->type = 1;
-    strcpy(pkt_->all_name, roomlist_.back()->get_all_client_id(client_id_).c_str());
-    deliver(*pkt_); // send all user name to new client; ->dont save recent_msgs_ in chat room
+    strcpy(pkt_->all_name, roomlist_.back()->GetAllClientId(client_id_).c_str());
+    Deliver(*pkt_); // send all user name to new client; ->dont save recent_msgs_ in chat room
                     //-> print that 000, welcome you in new client cmd
 
     // insert_newroom();
 }
 
-void ChatSession::do_enter_room()
+void ChatSession::DoEnterRoom()
 {
     auto it = roomlist_.begin();
     for (; it != roomlist_.end(); it++)
-        if (pkt_->selected_room_id == (*it)->getroomid())
+        if (pkt_->selected_room_id == (*it)->GetRoomId())
         {
             std::string client_id(pkt_->client_id);
             current_room_ = *it;
-            (*it)->join_user(client_id, shared_from_this());
+            (*it)->JoinUser(client_id, shared_from_this());
             //  memset(pkt_->client_id,0,NAME_SIZE);
             pkt_->type = 2;
             // strcpy(pkt_->client_id,client_id_.c_str());
-            // roomlist_.back()->deliver(*pkt_); // send new client name to all member in room ->print that 000 has joined in the room of all clients cmd
-            current_room_->deliver(*pkt_); // send new client name to all member in room ->print that 000 has joined in the room of all clients cmd
+            // roomlist_.back()->Deliver(*pkt_); // send new client name to all member in room ->print that 000 has joined in the room of all clients cmd
+            current_room_->Deliver(*pkt_); // send new client name to all member in room ->print that 000 has joined in the room of all clients cmd
             memset(pkt_->all_name, 0, BUF_SIZE);
             pkt_->type = 1;
-            strcpy(pkt_->all_name, (*it)->get_all_client_id(client_id_).c_str());
-            deliver(*pkt_); // send all user name to new client; ->dont save recent_msgs_ in chat room
+            strcpy(pkt_->all_name, (*it)->GetAllClientId(client_id_).c_str());
+            Deliver(*pkt_); // send all user name to new client; ->dont save recent_msgs_ in chat room
                             //-> print that 000, welcome you in new client cmd
             break;
         }
 }
 
-void ChatSession::notify_created_room()
+void ChatSession::NotifyCreatedRoom()
 {
     // auto it = roomlist_.begin();
     for (auto participant : participants_life_)
     {
         if (participant == shared_from_this())
             continue;
-        participant->make_roomlist();
-        participant->deliver(*(participant->getPacket()));
+        participant->MakeRoomList();
+        participant->Deliver(*(participant->GetPacket()));
     }
 }
 
-void ChatSession::file_upload(int thread_port)
+void ChatSession::FileUpload(int thread_port)
 {
     boost::asio::io_service io_service;
     tcp::endpoint endpoint(tcp::v4(), thread_port + 10000);

@@ -5,7 +5,7 @@ ChatSession::ChatSession(boost::asio::io_service &io_service,
     : io_service_(io_service),
       socket_(io_service), client_id_(client_id), host_(host), port_(port)
 {
-  do_connect(endpoint_iterator);
+  DoConnect(endpoint_iterator);
 }
 ChatSession::~ChatSession()
 {
@@ -13,13 +13,13 @@ ChatSession::~ChatSession()
   socket_.close();
 }
 
-void ChatSession::close()
+void ChatSession::Close()
 {
   io_service_.post([this]()
                    { socket_.close(); });
 }
 
-void ChatSession::file_upload(int thread_port)
+void ChatSession::FileUpload(int thread_port)
 {
 
   struct packet *pkt_file = (struct packet *)malloc(sizeof(struct packet));
@@ -92,11 +92,11 @@ void ChatSession::file_upload(int thread_port)
   strcpy(pkt_file->client_id, client_id_.c_str());
   pkt_file->type = 4;
 
-  write(*pkt_file);
+  Write(*pkt_file);
   free(pkt_file);
   pkt_file = NULL;
 }
-void ChatSession::write(struct packet &msg)
+void ChatSession::Write(struct packet &msg)
 {
   io_service_.post(
       [this, msg]()
@@ -105,12 +105,12 @@ void ChatSession::write(struct packet &msg)
         write_msgs_.push_back(msg);
         if (!write_in_progress)
         {
-          do_write();
+          DoWrite();
         }
       });
 }
 
-void ChatSession::display_roomlist()
+void ChatSession::DisplayRoomList()
 {
   std::cout << "Follow this guide line " << std::endl;
   std::cout << "1.input [q or Q] if you want to quit program  " << std::endl;
@@ -152,9 +152,9 @@ void ChatSession::display_roomlist()
     }
   }
 }
-int ChatSession::userinput_in_roomlist() // main thread execute this method
+int ChatSession::UserinputInRoomList() // main thread execute this method
 {
-  display_roomlist();
+  DisplayRoomList();
 
   char line[20];
   int quit = 0;
@@ -166,7 +166,7 @@ int ChatSession::userinput_in_roomlist() // main thread execute this method
   {
     if (!strcmp(line, "q") || !strcmp(line, "Q"))
     {
-      close();
+      Close();
       quit = 1;
       break;
     }
@@ -220,18 +220,18 @@ point:;
     std::cout << "2.Input [#file] if you want to send file." << std::endl;
     std::cout << "3.when you receive msg about file transfer request from server." << std::endl;
     std::cout << "3.Input [#y] or [#Y] if you want to receive file. Otherwise, input [#n] or [#N]" << std::endl;
-    write(pkt_write);
+    Write(pkt_write);
     return 0;
   } // main thread
   else
   {
     pkt_write.type = 7;
-    write(pkt_write);
+    Write(pkt_write);
     // sleep(2);
     return 1;
   }
 }
-void ChatSession::do_communicate_in_room()
+void ChatSession::DoCommunicateInRoom()
 {
   //  printf("---------------\n");
   char line[BUF_SIZE];
@@ -248,7 +248,7 @@ void ChatSession::do_communicate_in_room()
     if (!strcmp(line, "q") || !strcmp(line, "Q"))
     {
       pkt_write.type = 6;
-      write(pkt_write);
+      Write(pkt_write);
       break;
     }
     if (!strcmp(line, "#file"))
@@ -283,8 +283,8 @@ void ChatSession::do_communicate_in_room()
 
       } while ((port + 10000) == atoi(port_.c_str()));
       pkt_write.port = port;
-      write(pkt_write);
-      std::thread t(&ChatSession::file_upload, this, port);
+      Write(pkt_write);
+      std::thread t(&ChatSession::FileUpload, this, port);
       t.detach();
       // printf("here");
 
@@ -299,7 +299,7 @@ void ChatSession::do_communicate_in_room()
         strcpy(pkt_write.file_name, file_name_);
         pkt_write.file_transfer_check = 1;
         pkt_write.type = 5;
-        write(pkt_write);
+        Write(pkt_write);
         // std::thread t(&ChatSession::file_download, this);
         // t.detach();
         // file_transfer();
@@ -310,7 +310,7 @@ void ChatSession::do_communicate_in_room()
       {
         pkt_write.file_transfer_check = 0;
         pkt_write.type = 5;
-        write(pkt_write);
+        Write(pkt_write);
         file = 0;
         goto point;
       }
@@ -319,10 +319,10 @@ void ChatSession::do_communicate_in_room()
       std::cin.getline(line, BUF_SIZE);
     }
     pkt_write.type = 2;
-    write(pkt_write);
+    Write(pkt_write);
   // printf("here\n");
   point:;
     memset(line, 0, strlen(line));
   }
-  // do_read();
+  // DoRead();
 }

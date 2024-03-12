@@ -16,14 +16,14 @@ public:
   ~ChatRoom();
 
 public:
-  std::string getroomname();
-  int getroomid();
-  void leave(chat_participant_ptr participant, std::string client_id);
-  void join_user(std::string client_id, std::shared_ptr<ChatParticipant> participant);
+  std::string GetRoomName();
+  int GetRoomId();
+  void Leave(chat_participant_ptr participant, std::string client_id);
+  void JoinUser(std::string client_id, std::shared_ptr<ChatParticipant> participant);
 
-  void deliver(struct packet &msg);
-  void deliver(struct packet &msg, std::shared_ptr<ChatParticipant> myself);
-  std::string get_all_client_id(std::string client_id);
+  void Deliver(struct packet &msg);
+  void Deliver(struct packet &msg, std::shared_ptr<ChatParticipant> myself);
+  std::string GetAllClientId(std::string client_id);
 
 private: 
   std::list<std::string> clientid_list_;

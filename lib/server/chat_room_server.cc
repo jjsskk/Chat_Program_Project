@@ -11,15 +11,15 @@
   }
 
 
-  std::string ChatRoom::getroomname()
+  std::string ChatRoom::GetRoomName()
   {
     return room_name_;
   }
-  int ChatRoom::getroomid()
+  int ChatRoom::GetRoomId()
   {
     return room_id_;
   }
-  void ChatRoom::leave(chat_participant_ptr participant, std::string client_id)
+  void ChatRoom::Leave(chat_participant_ptr participant, std::string client_id)
   {
     participants_.erase(participant);
     auto it = clientid_list_.begin();
@@ -32,7 +32,7 @@
     printf("here2\n");
   }
 
-  void ChatRoom::join_user(std::string client_id, std::shared_ptr<ChatParticipant> participant)
+  void ChatRoom::JoinUser(std::string client_id, std::shared_ptr<ChatParticipant> participant)
   {
 
     clientid_list_.push_back(client_id);
@@ -41,10 +41,10 @@
     std::cout << client_id << " join " << room_name_ << "_" << room_id_ << std::endl;
     if (!recent_msgs_.empty())
       for (auto msg : recent_msgs_) // 채팅방 안 모든 유저에게 최근 주고받은 msg 전송
-        participant->deliver(msg);  // join()이 끝날떄까지는 read msg 전송 못함
+        participant->Deliver(msg);  // join()이 끝날떄까지는 read msg 전송 못함
   }
 
-  void ChatRoom::deliver(struct packet &msg)
+  void ChatRoom::Deliver(struct packet &msg)
   {
     printf("room of deliver executed\n");
     recent_msgs_.push_back(msg);
@@ -52,9 +52,9 @@
       recent_msgs_.pop_front();
 
     for (auto participant : participants_) // 채팅방 안 모든 유저에게 read받은 msg 전송
-      participant->deliver(msg);
+      participant->Deliver(msg);
   }
-  void ChatRoom::deliver(struct packet &msg, std::shared_ptr<ChatParticipant> myself)
+  void ChatRoom::Deliver(struct packet &msg, std::shared_ptr<ChatParticipant> myself)
   {
     // printf("room of deliver executed\n");
     // recent_msgs_.push_back(msg);
@@ -66,13 +66,13 @@
       if (participant != myself)
       {
         // printf("why twice\n");
-        participant->deliver(msg);
+        participant->Deliver(msg);
       }
       i++;
     }
     // printf("particpants number : %d\n",i);
   }
-  std::string ChatRoom::get_all_client_id(std::string client_id)
+  std::string ChatRoom::GetAllClientId(std::string client_id)
   {
     namelist_.clear();
     namelist_ = "";

@@ -1,6 +1,6 @@
 #include "chat_session_server.h"
 
-void ChatSession::do_read() // type = 0->read created room name and client_id
+void ChatSession::DoRead() // type = 0->read created room name and client_id
                              //  or type =1 ->read existed room name and room_id and client_id
 {
   auto self(shared_from_this());
@@ -17,9 +17,9 @@ void ChatSession::do_read() // type = 0->read created room name and client_id
                                 client_id_.append(pkt_->client_id);
                                 // client_id_+=std::c_str(pkt_->client_id);
                                 std::cout << client_id_ << " connected" << std::endl;
-                                do_create_room();
-                                notify_created_room();
-                                do_read();
+                                DoCreateRoom();
+                                NotifyCreatedRoom();
+                                DoRead();
                               }
                               else if (pkt_->type == 1) // server read selected roomname(already existed) and client_id
                               {
@@ -27,24 +27,24 @@ void ChatSession::do_read() // type = 0->read created room name and client_id
                                 client_id_.clear();
                                 client_id_.append(pkt_->client_id);
                                 std::cout << client_id_ << " connected" << std::endl;
-                                do_enter_room();
-                                do_read();
+                                DoEnterRoom();
+                                DoRead();
                               }
                               else if (pkt_->type == 2) // server read msg from client
                               {
                                 std::cout << " msg :" << pkt_->msg << std::endl;
                                 pkt_->type = 3;
-                                current_room_->deliver(*pkt_); // server send msg to all member in room
-                                do_read();
+                                current_room_->Deliver(*pkt_); // server send msg to all member in room
+                                DoRead();
                               }
                               else if (pkt_->type == 3) // server read upload file from client
                               {
 
                                 memset(file_name_, 0, sizeof(file_name_));
                                 strcpy(file_name_, pkt_->file_name);
-                                threadpool.emplace_back(&ChatSession::file_upload, this, pkt_->port);
+                                threadpool.emplace_back(&ChatSession::FileUpload, this, pkt_->port);
                                 threadpool.back().detach();
-                                // std::thread t(&ChatSession::file_upload, this);
+                                // std::thread t(&ChatSession::FileUpload, this);
                                 // t.detach();
 
                                 // if(fp == NULL)
@@ -59,7 +59,7 @@ void ChatSession::do_read() // type = 0->read created room name and client_id
                                 // fclose(fp);
                                 // fp = NULL;
                                 // }
-                                do_read();
+                                DoRead();
                               }
                               else if (pkt_->type == 4) // server read file request from client
                               {
@@ -68,11 +68,11 @@ void ChatSession::do_read() // type = 0->read created room name and client_id
                                 pkt_->type = 4;
                                 memset(file_name_, 0, sizeof(file_name_));
                                 strcpy(file_name_, pkt_->file_name);
-                                current_room_->deliver(*pkt_, shared_from_this()); // server send file read check msg to all member in room except himself
+                                current_room_->Deliver(*pkt_, shared_from_this()); // server send file read check msg to all member in room except himself
                                 // std::thread t(&ChatSession::file_transfer, this,(pkt_->port)+10000);
                                 //   t.detach();
 
-                                do_read();
+                                DoRead();
                               }
                               else if (pkt_->type == 5) // server read ack about whether client want to receive file
                               {
@@ -101,40 +101,40 @@ void ChatSession::do_read() // type = 0->read created room name and client_id
                                     {
                                       pkt_->type = 5;
                                       pkt_->end_read_size = read_cnt;
-                                      deliver(*pkt_);
+                                      Deliver(*pkt_);
                                       break;
                                     }
-                                    deliver(*pkt_);
+                                    Deliver(*pkt_);
                                     // socket_.write_some(boost::asio::buffer(pkt_, sizeof(struct packet)));
                                   }
                                   fclose(fp);
                                 }
 
-                                do_read();
+                                DoRead();
                               }
 
                               else if (pkt_->type == 6)
                               {
-                                current_room_->leave(shared_from_this(), client_id_);
+                                current_room_->Leave(shared_from_this(), client_id_);
                                 pkt_->type = 6;
                                 memset(pkt_->client_id, 0, NAME_SIZE);
                                 strcpy(pkt_->client_id, client_id_.c_str());
-                                current_room_->deliver(*pkt_); // server send msg to all member in room except leaved client
+                                current_room_->Deliver(*pkt_); // server send msg to all member in room except leaved client
                                 current_room_ = nullptr;
                                 printf("here\n");
-                                // leave();
-                                start();
+                                // Leave();
+                                Start();
                               }
                               else if (pkt_->type == 7)
                               {
                                 // printf("here\n");
                                 if (current_room_ != nullptr) // for client  unexpected close
                                 {
-                                  current_room_->leave(shared_from_this(), client_id_);
+                                  current_room_->Leave(shared_from_this(), client_id_);
                                   pkt_->type = 6;
                                   memset(pkt_->client_id, 0, NAME_SIZE);
                                   strcpy(pkt_->client_id, client_id_.c_str());
-                                  current_room_->deliver(*pkt_); // server send msg to all member in room except leaved client
+                                  current_room_->Deliver(*pkt_); // server send msg to all member in room except leaved client
                                 }
                                 participants_life_.erase(shared_from_this()); // to manage client_session object life cycle
                               }
@@ -144,19 +144,19 @@ void ChatSession::do_read() // type = 0->read created room name and client_id
                               std::cerr << "Exception: " << ec.message() << "\n";
                               if (current_room_ != nullptr) // for client  unexpected close
                               {
-                                current_room_->leave(shared_from_this(), client_id_);
+                                current_room_->Leave(shared_from_this(), client_id_);
                                 pkt_->type = 6;
                                 memset(pkt_->client_id, 0, NAME_SIZE);
                                 strcpy(pkt_->client_id, client_id_.c_str());
-                                current_room_->deliver(*pkt_); // server send msg to all member in room except leaved client
+                                current_room_->Deliver(*pkt_); // server send msg to all member in room except leaved client
                               }
                               participants_life_.erase(shared_from_this());
-                              // room_.leave(shared_from_this());
+                              // room_.Leave(shared_from_this());
                             }
                           });
 }
 
-void ChatSession::do_write()
+void ChatSession::DoWrite()
 {
   // sleep(5);
   auto self(shared_from_this());
@@ -170,7 +170,7 @@ void ChatSession::do_write()
                                write_msgs_.pop_front();
                                if (!write_msgs_.empty())
                                {
-                                 do_write();
+                                 DoWrite();
                                }
                              }
                              else
@@ -179,14 +179,14 @@ void ChatSession::do_write()
                                std::cerr << "Exception: " << ec.message() << "\n";
                                if (current_room_ != nullptr)
                                {
-                                 current_room_->leave(shared_from_this(), client_id_);
+                                 current_room_->Leave(shared_from_this(), client_id_);
                                  pkt_->type = 6;
                                  memset(pkt_->client_id, 0, NAME_SIZE);
                                  strcpy(pkt_->client_id, client_id_.c_str());
-                                 current_room_->deliver(*pkt_);
+                                 current_room_->Deliver(*pkt_);
                                }
                                participants_life_.erase(shared_from_this());
-                               //  room_.leave(shared_from_this());
+                               //  room_.Leave(shared_from_this());
                              }
                            });
 }

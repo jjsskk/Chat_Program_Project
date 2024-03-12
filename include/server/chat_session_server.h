@@ -22,21 +22,21 @@ class ChatSession
 public:
   ChatSession(boost::asio::io_service &io_service, tcp::socket socket, std::list<std::shared_ptr<ChatRoom>> &roomlist, std::string port);
   ~ChatSession();
-  void start();
-  void make_roomlist();
-  void leave();
-  struct packet *getPacket();
-  void deliver(struct packet &msg);
+  void Start();
+  void MakeRoomList();
+  void Leave();
+  struct packet *GetPacket();
+  void Deliver(struct packet &msg);
 
 private:
-  void do_write();
+  void DoWrite();
 
-  void file_upload(int thread_port);
-  void do_read(); 
+  void FileUpload(int thread_port);
+  void DoRead(); 
 
-  void do_create_room();
-  void notify_created_room();
-  void do_enter_room();
+  void DoCreateRoom();
+  void NotifyCreatedRoom();
+  void DoEnterRoom();
 
   boost::asio::io_service &io_service_;
   tcp::socket socket_;

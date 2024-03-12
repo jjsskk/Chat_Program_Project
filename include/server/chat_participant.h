@@ -6,9 +6,9 @@ class ChatParticipant
 {
 public:
     virtual ~ChatParticipant() {}
-    virtual void deliver(struct packet &msg) = 0;
-    virtual void make_roomlist() = 0;
-    virtual struct packet *getPacket() = 0;
+    virtual void Deliver(struct packet &msg) = 0;
+    virtual void MakeRoomList() = 0;
+    virtual struct packet *GetPacket() = 0;
     // virtual std::string get_client_id() =0;
 };
 

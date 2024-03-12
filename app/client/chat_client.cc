@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
       }
       // printf("display\n");
       printf("----------------------------------------------\n");
-      if (c.userinput_in_roomlist() == 1)
+      if (c.UserinputInRoomList() == 1)
         break;
       mtx_list.lock();
       list = 0;
@@ -49,13 +49,13 @@ int main(int argc, char *argv[])
         // printf("0");
       }
       // printf("communicate\n");
-      c.do_communicate_in_room();
+      c.DoCommunicateInRoom();
       mtx_room.lock();
       room = 0;
       mtx_room.unlock();
     }
 
-    // c.close();
+    // c.Close();
     io_service.stop();
     t.join();
     std::cout << "program terminated" << std::endl;

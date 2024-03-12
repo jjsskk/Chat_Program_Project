@@ -36,7 +36,7 @@ private:
                              {
                                //  participants_life_.insert(std::make_shared<ChatSession>(io_service_,std::move(socket_), roomlist_));
                                std::shared_ptr<ChatSession> ptr = std::make_shared<ChatSession>(io_service_, std::move(socket_), roomlist_, port_);
-                               ptr->start();
+                               ptr->Start();
                                participants_life_.insert(ptr);
                              }
 
