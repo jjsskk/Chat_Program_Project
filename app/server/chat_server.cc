@@ -15,10 +15,10 @@ using boost::asio::ip::tcp;
 #include "chat_room_server.h"
 #include "chat_session_server.h"
 
-class chat_server
+class ChatServer
 {
 public:
-  chat_server(boost::asio::io_service &io_service,
+  ChatServer(boost::asio::io_service &io_service,
               const tcp::endpoint &endpoint, std::string port)
       : io_service_(io_service), acceptor_(io_service, endpoint),
         socket_(io_service), port_(port)
@@ -34,8 +34,8 @@ private:
                            {
                              if (!ec)
                              {
-                               //  participants_life_.insert(std::make_shared<chat_session>(io_service_,std::move(socket_), roomlist_));
-                               std::shared_ptr<chat_session> ptr = std::make_shared<chat_session>(io_service_, std::move(socket_), roomlist_, port_);
+                               //  participants_life_.insert(std::make_shared<ChatSession>(io_service_,std::move(socket_), roomlist_));
+                               std::shared_ptr<ChatSession> ptr = std::make_shared<ChatSession>(io_service_, std::move(socket_), roomlist_, port_);
                                ptr->start();
                                participants_life_.insert(ptr);
                              }
@@ -46,7 +46,7 @@ private:
   boost::asio::io_service &io_service_;
   tcp::acceptor acceptor_;
   tcp::socket socket_;
-  std::list<std::shared_ptr<chat_room>> roomlist_;
+  std::list<std::shared_ptr<ChatRoom>> roomlist_;
   std::string port_;
 };
 
@@ -58,13 +58,13 @@ int main(int argc, char *argv[])
   {
     if (argc < 2)
     {
-      std::cerr << "Usage: chat_server <port> [<port> ...]\n";
+      std::cerr << "Usage: ChatServer <port> [<port> ...]\n";
       return 1;
     }
 
     boost::asio::io_service io_service;
 
-    std::list<chat_server> servers;
+    std::list<ChatServer> servers;
     for (int i = 1; i < argc; ++i)
     {
       tcp::endpoint endpoint(tcp::v4(), std::atoi(argv[i]));

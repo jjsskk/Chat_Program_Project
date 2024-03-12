@@ -1,25 +1,25 @@
 
 #include "chat_room_server.h"
 
-  chat_room::chat_room(int room_id, std::string room_name) : room_id_(room_id), room_name_(room_name)
+  ChatRoom::ChatRoom(int room_id, std::string room_name) : room_id_(room_id), room_name_(room_name)
   {
-    std::cout << " chat_room id: " << room_id_ << " serviced" << std::endl;
+    std::cout << " ChatRoom id: " << room_id_ << " serviced" << std::endl;
   }
-  chat_room::~chat_room()
+  ChatRoom::~ChatRoom()
   {
-    std::cout << " chat_room id: " << room_id_ << " terminated" << std::endl;
+    std::cout << " ChatRoom id: " << room_id_ << " terminated" << std::endl;
   }
 
 
-  std::string chat_room::getroomname()
+  std::string ChatRoom::getroomname()
   {
     return room_name_;
   }
-  int chat_room::getroomid()
+  int ChatRoom::getroomid()
   {
     return room_id_;
   }
-  void chat_room::leave(chat_participant_ptr participant, std::string client_id)
+  void ChatRoom::leave(chat_participant_ptr participant, std::string client_id)
   {
     participants_.erase(participant);
     auto it = clientid_list_.begin();
@@ -32,7 +32,7 @@
     printf("here2\n");
   }
 
-  void chat_room::join_user(std::string client_id, std::shared_ptr<chat_participant> participant)
+  void ChatRoom::join_user(std::string client_id, std::shared_ptr<ChatParticipant> participant)
   {
 
     clientid_list_.push_back(client_id);
@@ -44,7 +44,7 @@
         participant->deliver(msg);  // join()이 끝날떄까지는 read msg 전송 못함
   }
 
-  void chat_room::deliver(struct packet &msg)
+  void ChatRoom::deliver(struct packet &msg)
   {
     printf("room of deliver executed\n");
     recent_msgs_.push_back(msg);
@@ -54,7 +54,7 @@
     for (auto participant : participants_) // 채팅방 안 모든 유저에게 read받은 msg 전송
       participant->deliver(msg);
   }
-  void chat_room::deliver(struct packet &msg, std::shared_ptr<chat_participant> myself)
+  void ChatRoom::deliver(struct packet &msg, std::shared_ptr<ChatParticipant> myself)
   {
     // printf("room of deliver executed\n");
     // recent_msgs_.push_back(msg);
@@ -72,7 +72,7 @@
     }
     // printf("particpants number : %d\n",i);
   }
-  std::string chat_room::get_all_client_id(std::string client_id)
+  std::string ChatRoom::get_all_client_id(std::string client_id)
   {
     namelist_.clear();
     namelist_ = "";

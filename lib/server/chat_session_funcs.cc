@@ -1,30 +1,30 @@
 #include "chat_session_server.h"
 
-chat_session::chat_session(boost::asio::io_service &io_service, tcp::socket socket, std::list<std::shared_ptr<chat_room>> &roomlist, std::string port)
+ChatSession::ChatSession(boost::asio::io_service &io_service, tcp::socket socket, std::list<std::shared_ptr<ChatRoom>> &roomlist, std::string port)
     : io_service_(io_service), socket_(std::move(socket)), port_(port),
       roomlist_(roomlist)
 {
     // start();
 }
-chat_session::~chat_session()
+ChatSession::~ChatSession()
 {
     free(pkt_);
     socket_.close();
-    std::cout << "chat_session terminated" << std::endl;
+    std::cout << "ChatSession terminated" << std::endl;
 }
 
-void chat_session::start()
+void ChatSession::start()
 {
 
     make_roomlist();
     deliver(*pkt_);
     do_read();
     // do_read_room();
-    //  std::make_shared<chat_session>(std::move(socket_), room_)->start();
+    //  std::make_shared<ChatSession>(std::move(socket_), room_)->start();
 }
-void chat_session::leave()
+void ChatSession::leave()
 {
-    // to_do remove chat_room in roomlist
+    // to_do remove ChatRoom in roomlist
 
     io_service_.post(
         [this]()
@@ -33,12 +33,12 @@ void chat_session::leave()
             start();
         });
 }
-struct packet *chat_session::getPacket()
+struct packet *ChatSession::getPacket()
 {
     return pkt_;
 }
 
-void chat_session::deliver(struct packet &msg) // 채팅방 안 모든 유저에게 read받은 msg 전송
+void ChatSession::deliver(struct packet &msg) // 채팅방 안 모든 유저에게 read받은 msg 전송
 {
     // fflush(stdout);
     printf("parcipant deliver :%s\n", msg.all_name);
@@ -57,7 +57,7 @@ void chat_session::deliver(struct packet &msg) // 채팅방 안 모든 유저에
     // do_write()진행을 못마치고 온 상태라서 (write_in progress =true) do_write()를 다시 호출 못하게 막는다 (대신에 write_msgs_에 못보낸 read msg를 차곡차곡 쌓음)
     // 그후 아까 중단됬던 do_Write를 다시 진행해서 write_msgs큐(그동안 못보낸 read msg가  큐에계속 쌓임)를 모두 보내서 모두 비우면 다시 read했을때 do_write()한다
 }
-void chat_session::make_roomlist()
+void ChatSession::make_roomlist()
 {
     namelist_.clear();
     idlist_.clear();
@@ -83,11 +83,11 @@ void chat_session::make_roomlist()
     pkt_->type = 0; // send room list to corrsponding client
 }
 
-void chat_session::do_create_room()
+void ChatSession::do_create_room()
 {
     std::string name(pkt_->selected_roomname);
-    std::shared_ptr<chat_room> ptr =
-        std::make_shared<chat_room>(room_id++, name);
+    std::shared_ptr<ChatRoom> ptr =
+        std::make_shared<ChatRoom>(room_id++, name);
     roomlist_.push_back(ptr);
     current_room_ = ptr;
     std::string client_id(pkt_->client_id);
@@ -105,7 +105,7 @@ void chat_session::do_create_room()
     // insert_newroom();
 }
 
-void chat_session::do_enter_room()
+void ChatSession::do_enter_room()
 {
     auto it = roomlist_.begin();
     for (; it != roomlist_.end(); it++)
@@ -128,7 +128,7 @@ void chat_session::do_enter_room()
         }
 }
 
-void chat_session::notify_created_room()
+void ChatSession::notify_created_room()
 {
     // auto it = roomlist_.begin();
     for (auto participant : participants_life_)
@@ -140,7 +140,7 @@ void chat_session::notify_created_room()
     }
 }
 
-void chat_session::file_upload(int thread_port)
+void ChatSession::file_upload(int thread_port)
 {
     boost::asio::io_service io_service;
     tcp::endpoint endpoint(tcp::v4(), thread_port + 10000);

@@ -9,24 +9,23 @@
 #include "globalVariable.h"
 #include "struct_pkt.h"
 
-class chat_room
+class ChatRoom
 {
 public:
-  chat_room(int room_id, std::string room_name);
-  ~chat_room();
+  ChatRoom(int room_id, std::string room_name);
+  ~ChatRoom();
 
 public:
   std::string getroomname();
   int getroomid();
   void leave(chat_participant_ptr participant, std::string client_id);
-  void join_user(std::string client_id, std::shared_ptr<chat_participant> participant);
+  void join_user(std::string client_id, std::shared_ptr<ChatParticipant> participant);
 
   void deliver(struct packet &msg);
-  void deliver(struct packet &msg, std::shared_ptr<chat_participant> myself);
+  void deliver(struct packet &msg, std::shared_ptr<ChatParticipant> myself);
   std::string get_all_client_id(std::string client_id);
 
-  // do_write_
-private: // 전역 변수들
+private: 
   std::list<std::string> clientid_list_;
   std::set<chat_participant_ptr> participants_;      // client_id
   std::set<chat_participant_ptr> participants_file_; // client_id

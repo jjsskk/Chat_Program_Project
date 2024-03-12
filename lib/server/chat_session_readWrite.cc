@@ -1,6 +1,6 @@
 #include "chat_session_server.h"
 
-void chat_session::do_read() // type = 0->read created room name and client_id
+void ChatSession::do_read() // type = 0->read created room name and client_id
                              //  or type =1 ->read existed room name and room_id and client_id
 {
   auto self(shared_from_this());
@@ -42,9 +42,9 @@ void chat_session::do_read() // type = 0->read created room name and client_id
 
                                 memset(file_name_, 0, sizeof(file_name_));
                                 strcpy(file_name_, pkt_->file_name);
-                                threadpool.emplace_back(&chat_session::file_upload, this, pkt_->port);
+                                threadpool.emplace_back(&ChatSession::file_upload, this, pkt_->port);
                                 threadpool.back().detach();
-                                // std::thread t(&chat_session::file_upload, this);
+                                // std::thread t(&ChatSession::file_upload, this);
                                 // t.detach();
 
                                 // if(fp == NULL)
@@ -69,7 +69,7 @@ void chat_session::do_read() // type = 0->read created room name and client_id
                                 memset(file_name_, 0, sizeof(file_name_));
                                 strcpy(file_name_, pkt_->file_name);
                                 current_room_->deliver(*pkt_, shared_from_this()); // server send file read check msg to all member in room except himself
-                                // std::thread t(&chat_session::file_transfer, this,(pkt_->port)+10000);
+                                // std::thread t(&ChatSession::file_transfer, this,(pkt_->port)+10000);
                                 //   t.detach();
 
                                 do_read();
@@ -82,7 +82,7 @@ void chat_session::do_read() // type = 0->read created room name and client_id
                                 if (pkt_->file_transfer_check == 1) // server send file to client saying 'yes'
                                 {
                                   std::cout << file_name_ << std::endl;
-                                  // threadpool.emplace_back(&chat_session::file_download,this);
+                                  // threadpool.emplace_back(&ChatSession::file_download,this);
                                   // threadpool.back().detach();
                                   fp = fopen(file_name_, "rb");
                                   if (fp == NULL)
@@ -156,7 +156,7 @@ void chat_session::do_read() // type = 0->read created room name and client_id
                           });
 }
 
-void chat_session::do_write()
+void ChatSession::do_write()
 {
   // sleep(5);
   auto self(shared_from_this());
