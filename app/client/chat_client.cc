@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
     // to prevent ioservice terminated when thread assigned to ioservice have no work
     tcp::resolver resolver(io_service);
     auto endpoint_iterator = resolver.resolve({argv[1], argv[2]});
-    chat_session c(io_service, endpoint_iterator, argv[3], argv[1], argv[2]);
+    ChatSession c(io_service, endpoint_iterator, argv[3], argv[1], argv[2]);
     std::thread t([&io_service]()
                   { io_service.run(); });
 

@@ -10,12 +10,12 @@
 #include <iostream>
 using boost::asio::ip::tcp;
 
-class chat_session
+class ChatSession
 {
 public:
-  chat_session(boost::asio::io_service &io_service,
+  ChatSession(boost::asio::io_service &io_service,
                tcp::resolver::iterator endpoint_iterator, std::string client_id, std::string host, std::string port);
-  ~chat_session();
+  ~ChatSession();
 
   void write(struct packet &msg);
 

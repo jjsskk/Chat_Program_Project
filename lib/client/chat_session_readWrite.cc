@@ -1,6 +1,6 @@
 #include "chat_session_client.h"
 
-void chat_session::do_connect(tcp::resolver::iterator endpoint_iterator)
+void ChatSession::do_connect(tcp::resolver::iterator endpoint_iterator)
 {
     boost::asio::async_connect(socket_, endpoint_iterator,
                                [this](boost::system::error_code ec, tcp::resolver::iterator)
@@ -12,7 +12,7 @@ void chat_session::do_connect(tcp::resolver::iterator endpoint_iterator)
                                });
 }
 
-void chat_session::do_read()
+void ChatSession::do_read()
 { //// be careful that you use async_read!! -> this method only read buffer when buffer filled by write data .if otherwise, don't read
     boost::asio::async_read(socket_,
                             boost::asio::buffer(pkt_read, sizeof(struct packet)),
@@ -111,7 +111,7 @@ void chat_session::do_read()
                             });
 }
 
-void chat_session::do_write()
+void ChatSession::do_write()
 {
     boost::asio::async_write(socket_,
                              boost::asio::buffer(&(write_msgs_.front()), sizeof(struct packet)),

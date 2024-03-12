@@ -1,25 +1,25 @@
 #include "chat_session_client.h"
 
-chat_session::chat_session(boost::asio::io_service &io_service,
+ChatSession::ChatSession(boost::asio::io_service &io_service,
              tcp::resolver::iterator endpoint_iterator, std::string client_id, std::string host, std::string port)
     : io_service_(io_service),
       socket_(io_service), client_id_(client_id), host_(host), port_(port)
 {
   do_connect(endpoint_iterator);
 }
-chat_session::~chat_session()
+ChatSession::~ChatSession()
 {
   free(pkt_read);
   socket_.close();
 }
 
-void chat_session::close()
+void ChatSession::close()
 {
   io_service_.post([this]()
                    { socket_.close(); });
 }
 
-void chat_session::file_upload(int thread_port)
+void ChatSession::file_upload(int thread_port)
 {
 
   struct packet *pkt_file = (struct packet *)malloc(sizeof(struct packet));
@@ -96,7 +96,7 @@ void chat_session::file_upload(int thread_port)
   free(pkt_file);
   pkt_file = NULL;
 }
-void chat_session::write(struct packet &msg)
+void ChatSession::write(struct packet &msg)
 {
   io_service_.post(
       [this, msg]()
@@ -110,7 +110,7 @@ void chat_session::write(struct packet &msg)
       });
 }
 
-void chat_session::display_roomlist()
+void ChatSession::display_roomlist()
 {
   std::cout << "Follow this guide line " << std::endl;
   std::cout << "1.input [q or Q] if you want to quit program  " << std::endl;
@@ -152,7 +152,7 @@ void chat_session::display_roomlist()
     }
   }
 }
-int chat_session::userinput_in_roomlist() // main thread execute this method
+int ChatSession::userinput_in_roomlist() // main thread execute this method
 {
   display_roomlist();
 
@@ -231,7 +231,7 @@ point:;
     return 1;
   }
 }
-void chat_session::do_communicate_in_room()
+void ChatSession::do_communicate_in_room()
 {
   //  printf("---------------\n");
   char line[BUF_SIZE];
@@ -284,7 +284,7 @@ void chat_session::do_communicate_in_room()
       } while ((port + 10000) == atoi(port_.c_str()));
       pkt_write.port = port;
       write(pkt_write);
-      std::thread t(&chat_session::file_upload, this, port);
+      std::thread t(&ChatSession::file_upload, this, port);
       t.detach();
       // printf("here");
 
@@ -300,7 +300,7 @@ void chat_session::do_communicate_in_room()
         pkt_write.file_transfer_check = 1;
         pkt_write.type = 5;
         write(pkt_write);
-        // std::thread t(&chat_session::file_download, this);
+        // std::thread t(&ChatSession::file_download, this);
         // t.detach();
         // file_transfer();
         file = 0;
