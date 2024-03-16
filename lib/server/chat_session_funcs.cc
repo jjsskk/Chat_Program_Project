@@ -1,7 +1,7 @@
 #include "chat_session_server.h"
 
-ChatSession::ChatSession(boost::asio::io_service &io_service, tcp::socket socket, std::list<std::shared_ptr<ChatRoom>> &roomlist, std::string port)
-    : io_service_(io_service), socket_(std::move(socket)), port_(port),
+ChatSession::ChatSession(boost::asio::io_service &io_service, tcp::socket socket, list<shared_ptr<ChatRoom>> &roomlist, string port)
+    : io_service_(io_service), socket_(move(socket)), port_(port),
       roomlist_(roomlist)
 {
     // Start();
@@ -10,7 +10,7 @@ ChatSession::~ChatSession()
 {
     free(pkt_);
     socket_.close();
-    std::cout << "ChatSession terminated" << std::endl;
+    cout << "ChatSession terminated" << endl;
 }
 
 void ChatSession::Start()
@@ -19,7 +19,7 @@ void ChatSession::Start()
     MakeRoomList();
     Deliver(*pkt_);
     DoRead();
-    //  std::make_shared<ChatSession>(std::move(socket_), room_)->Start();
+    //  make_shared<ChatSession>(move(socket_), room_)->Start();
 }
 void ChatSession::Leave()
 {
@@ -37,14 +37,14 @@ struct packet *ChatSession::GetPacket()
     return pkt_;
 }
 
-void ChatSession::Deliver(struct packet &msg) // 채팅방 안 모든 유저에게 read받은 msg 전송
+void ChatSession::Deliver(struct packet &msg) //  해당 session으로 연결된 유저에게 msg 전송
 {
     // fflush(stdout);
     printf("parcipant deliver :%s\n", msg.all_name);
     //  printf("hell3\n");
     bool write_in_progress = !write_msgs_.empty();
     write_msgs_.push_back(msg); // 전송할 msg(read받은 msg) 저장
-    std::cout << write_in_progress << std::endl;
+    cout << write_in_progress << endl;
     if (!write_in_progress) // write_in progress =true(DoWrite()진행중) = write_msgs가 비어있지 않음
     {
         // printf("hell2\n");
@@ -67,7 +67,7 @@ void ChatSession::MakeRoomList()
 
         namelist_ += room->GetRoomName();
         namelist_ += "/";
-        idlist_ += std::to_string(room->GetRoomId());
+        idlist_ += to_string(room->GetRoomId());
         idlist_ += "/";
     }
     if (roomlist_.empty())
@@ -84,12 +84,12 @@ void ChatSession::MakeRoomList()
 
 void ChatSession::DoCreateRoom()
 {
-    std::string name(pkt_->selected_roomname);
-    std::shared_ptr<ChatRoom> ptr =
-        std::make_shared<ChatRoom>(room_id++, name);
+    string name(pkt_->selected_roomname);
+    shared_ptr<ChatRoom> ptr =
+        make_shared<ChatRoom>(room_id++, name);
     roomlist_.push_back(ptr);
     current_room_ = ptr;
-    std::string client_id(pkt_->client_id);
+    string client_id(pkt_->client_id);
     roomlist_.back()->JoinUser(client_id, shared_from_this()); // save client_id and socket in room
                                                                 //  memset(pkt_->client_id,0,NAME_SIZE);
     pkt_->type = 2;
@@ -110,13 +110,10 @@ void ChatSession::DoEnterRoom()
     for (; it != roomlist_.end(); it++)
         if (pkt_->selected_room_id == (*it)->GetRoomId())
         {
-            std::string client_id(pkt_->client_id);
+            string client_id(pkt_->client_id);
             current_room_ = *it;
             (*it)->JoinUser(client_id, shared_from_this());
-            //  memset(pkt_->client_id,0,NAME_SIZE);
             pkt_->type = 2;
-            // strcpy(pkt_->client_id,client_id_.c_str());
-            // roomlist_.back()->Deliver(*pkt_); // send new client name to all member in room ->print that 000 has joined in the room of all clients cmd
             current_room_->Deliver(*pkt_); // send new client name to all member in room ->print that 000 has joined in the room of all clients cmd
             memset(pkt_->all_name, 0, BUF_SIZE);
             pkt_->type = 1;
@@ -166,24 +163,13 @@ void ChatSession::FileUpload(int thread_port)
         while ((read_length = socket.read_some(boost::asio::buffer(file, FILE_SIZE))) != 0)
             fwrite((void *)(file), 1, read_length, fp);
 
-        //   {
-        //     file_size += read_length;
-        // //  printf("readread!!%d\n",pkt_file.end_read_size);
-        //     if(file_size == file_size_client )
-        //     {
-        //       fwrite((void*)(pkt_file.file_content),1,pkt_file.end_read_size,fp);
-        //         break;
-        //     }
-
-        //   fwrite((void*)(pkt_file.file_content),1,FILE_SIZE,fp);
-        //   }
         printf("writewrite!!\n");
 
         socket.write_some(boost::asio::buffer(file, read_length));
     }
-    catch (std::exception &e)
+    catch (exception &e)
     {
-        std::cerr << "Exception: " << e.what() << "\n";
+        cerr << "Exception: " << e.what() << "\n";
         socket.close();
     }
 

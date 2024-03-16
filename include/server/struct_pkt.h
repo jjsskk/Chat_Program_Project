@@ -8,7 +8,6 @@
 
 struct packet
 {
-
     short type;
     char client_id[NAME_SIZE];
     char selected_roomname[NAME_SIZE];

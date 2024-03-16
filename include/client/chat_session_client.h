@@ -9,12 +9,13 @@
 #include <deque>
 #include <iostream>
 using boost::asio::ip::tcp;
+using namespace std;
 
 class ChatSession
 {
 public:
   ChatSession(boost::asio::io_service &io_service,
-               tcp::resolver::iterator endpoint_iterator, std::string client_id, std::string host, std::string port);
+               tcp::resolver::iterator endpoint_iterator, string client_id, string host, string port);
   ~ChatSession();
 
   void Write(struct packet &msg);
@@ -36,15 +37,15 @@ private:
 private:
   boost::asio::io_service &io_service_;
   tcp::socket socket_;
-  std::string client_id_;
-  std::string host_;
-  std::string port_;
-  std::string selectd_room_;
-  std::vector<std::string> roomlist_;
-  std::vector<std::string> roomidlist_;
+  string client_id_;
+  string host_;
+  string port_;
+  string selectd_room_;
+  vector<string> roomlist_;
+  vector<string> roomidlist_;
   // chat_message read_msg_;
   struct packet *pkt_read = (struct packet *)malloc(sizeof(struct packet));
-  std::deque<struct packet> write_msgs_;
+  deque<struct packet> write_msgs_;
   FILE *fp = NULL;
   char file_name_[20];
 };

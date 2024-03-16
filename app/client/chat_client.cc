@@ -4,11 +4,10 @@
 #include <thread>
 #include <boost/asio.hpp>
 
-using boost::asio::ip::tcp;
 #include "globalVariable.h"
 
 #include "chat_session_client.h"
-
+using namespace std;
 using work_guard_type = boost::asio::executor_work_guard<boost::asio::io_service::executor_type>;
 
 int main(int argc, char *argv[])
@@ -17,7 +16,7 @@ int main(int argc, char *argv[])
   {
     if (argc != 4)
     {
-      std::cerr << "Usage: chat_client <host> <port> <ID>\n";
+      cerr << "Usage: chat_client <host> <port> <ID>\n";
       return 1;
     }
 
@@ -27,7 +26,7 @@ int main(int argc, char *argv[])
     tcp::resolver resolver(io_service);
     auto endpoint_iterator = resolver.resolve({argv[1], argv[2]});
     ChatSession c(io_service, endpoint_iterator, argv[3], argv[1], argv[2]);
-    std::thread t([&io_service]()
+    thread t([&io_service]()
                   { io_service.run(); });
 
     while (1)
@@ -58,11 +57,11 @@ int main(int argc, char *argv[])
     // c.Close();
     io_service.stop();
     t.join();
-    std::cout << "program terminated" << std::endl;
+    cout << "program terminated" << endl;
   }
-  catch (std::exception &e)
+  catch (exception &e)
   {
-    std::cerr << "Exception: " << e.what() << "!!!"
+    cerr << "Exception: " << e.what() << "!!!"
               << "\n";
   }
 

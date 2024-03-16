@@ -3,7 +3,8 @@
 #include <set>
 #include "chat_participant.h"
 
+using namespace std;
 
-extern std::set<chat_participant_ptr> participants_life_; // to manage client_session object life cycle
+extern set<chat_participant_ptr> participants_life_; // to manage client_session object life cycle
 extern int room_id;
 #endif

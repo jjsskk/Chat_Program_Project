@@ -1,7 +1,7 @@
 #include "chat_session_client.h"
 
 ChatSession::ChatSession(boost::asio::io_service &io_service,
-             tcp::resolver::iterator endpoint_iterator, std::string client_id, std::string host, std::string port)
+             tcp::resolver::iterator endpoint_iterator, string client_id, string host, string port)
     : io_service_(io_service),
       socket_(io_service), client_id_(client_id), host_(host), port_(port)
 {
@@ -44,7 +44,7 @@ void ChatSession::FileUpload(int thread_port)
   boost::asio::io_service ioservice;
   tcp::socket socket(ioservice);
   tcp::resolver resolver(ioservice);
-  tcp::resolver::query q{host_, std::to_string(thread_port + 10000)};
+  tcp::resolver::query q{host_, to_string(thread_port + 10000)};
   try
   {
 
@@ -76,15 +76,15 @@ void ChatSession::FileUpload(int thread_port)
     socket.read_some(boost::asio::buffer(file, read_cnt));
     printf("readread!!\n");
   }
-  catch (std::exception &e)
+  catch (exception &e)
   {
-    std::cerr << "upload shutdown:  " << e.what() << "\n";
+    cerr << "upload shutdown:  " << e.what() << "\n";
     socket.close();
   }
   socket.close();
   fclose(fp);
   fp = NULL;
-  std::cout << "file upload done" << std::endl;
+  cout << "file upload done" << endl;
 
   memset(pkt_file->file_name, 0, NAME_SIZE);
   memset(pkt_file->client_id, 0, NAME_SIZE);
@@ -112,11 +112,11 @@ void ChatSession::Write(struct packet &msg)
 
 void ChatSession::DisplayRoomList()
 {
-  std::cout << "Follow this guide line " << std::endl;
-  std::cout << "1.input [q or Q] if you want to quit program  " << std::endl;
-  std::cout << "2.input [create] if you want to create new room " << std::endl;
-  std::cout << "3.input [existed only room Id not room Name] if you want to enter alread existed room" << std::endl;
-  std::cout << "3.ex) [1] not [hello]" << std::endl;
+  cout << "Follow this guide line " << endl;
+  cout << "1.input [q or Q] if you want to quit program  " << endl;
+  cout << "2.input [create] if you want to create new room " << endl;
+  cout << "3.input [existed only room Id not room Name] if you want to enter alread existed room" << endl;
+  cout << "3.ex) [1] not [hello]" << endl;
 
   roomlist_.clear();
   roomidlist_.clear();
@@ -145,8 +145,8 @@ void ChatSession::DisplayRoomList()
     auto it = roomidlist_.begin();
     for (auto room : roomlist_)
     {
-      std::cout << (*it) << "(roomId) ->"
-                << "    " << room << "(roomName)" << std::endl;
+      cout << (*it) << "(roomId) ->"
+                << "    " << room << "(roomName)" << endl;
 
       it++;
     }
@@ -162,7 +162,7 @@ int ChatSession::UserinputInRoomList() // main thread execute this method
   struct packet pkt_write;
   memset(line, 0, strlen(line));
 
-  while (std::cin.getline(line, 20)) // remain places filled with null
+  while (cin.getline(line, 20)) // remain places filled with null
   {
     if (!strcmp(line, "q") || !strcmp(line, "Q"))
     {
@@ -174,9 +174,9 @@ int ChatSession::UserinputInRoomList() // main thread execute this method
     {
       memset(line, 0, strlen(line));
       printf("enter room name : ");
-      std::cin.getline(line, 20);
+      cin.getline(line, 20);
 
-      std::cout << "Selectd room :" << line << std::endl;
+      cout << "Selectd room :" << line << endl;
 
       selectd_room_.clear();
       selectd_room_.append(line);
@@ -192,7 +192,7 @@ int ChatSession::UserinputInRoomList() // main thread execute this method
     {
       if (!strcmp(line, (*it_id).c_str()))
       {
-        std::cout << "selectd room :" << *it << std::endl;
+        cout << "selectd room :" << *it << endl;
         // strcpy(selectd_room_.data(), line);
         selectd_room_.clear();
         selectd_room_.append(*it);
@@ -207,19 +207,19 @@ int ChatSession::UserinputInRoomList() // main thread execute this method
       it_id++;
     }
     memset(line, 0, strlen(line));
-    std::cout << "Pleasee enter existed chat room Id!" << std::endl;
+    cout << "Pleasee enter existed chat room Id!" << endl;
   }
 point:;
-  // std::cout << "go out loop!" << std::endl;
+  // cout << "go out loop!" << endl;
 
   if (quit == 0)
   {
     printf("------------------------------\n");
-    std::cout << "Welcome to " << selectd_room_ << " room!!!" << std::endl;
-    std::cout << "1.Input [q or Q] if you want to leave this room." << std::endl;
-    std::cout << "2.Input [#file] if you want to send file." << std::endl;
-    std::cout << "3.when you receive msg about file transfer request from server." << std::endl;
-    std::cout << "3.Input [#y] or [#Y] if you want to receive file. Otherwise, input [#n] or [#N]" << std::endl;
+    cout << "Welcome to " << selectd_room_ << " room!!!" << endl;
+    cout << "1.Input [q or Q] if you want to leave this room." << endl;
+    cout << "2.Input [#file] if you want to send file." << endl;
+    cout << "3.when you receive msg about file transfer request from server." << endl;
+    cout << "3.Input [#y] or [#Y] if you want to receive file. Otherwise, input [#n] or [#N]" << endl;
     Write(pkt_write);
     return 0;
   } // main thread
@@ -235,16 +235,16 @@ void ChatSession::DoCommunicateInRoom()
 {
   //  printf("---------------\n");
   char line[BUF_SIZE];
-  // std::cout << "Welcome to " << selectd_room_ << " room!!!" << std::endl;
+  // cout << "Welcome to " << selectd_room_ << " room!!!" << endl;
   struct packet pkt_write;
 
-  while (std::cin.getline(line, BUF_SIZE))
+  while (cin.getline(line, BUF_SIZE))
   { // n-1개의 문자 개수만큼 읽어와 str에 저장 (n번째 문자 or 나머지 문자전부는 NULL(‘\0’)로 바꾼다.)
 
     memset(&pkt_write, 0, sizeof(struct packet));
     pkt_write.type = 2; // send msg to server
-    std::memcpy(pkt_write.client_id, client_id_.c_str(), client_id_.length());
-    std::memcpy(pkt_write.msg, line, BUF_SIZE);
+    memcpy(pkt_write.client_id, client_id_.c_str(), client_id_.length());
+    memcpy(pkt_write.msg, line, BUF_SIZE);
     if (!strcmp(line, "q") || !strcmp(line, "Q"))
     {
       pkt_write.type = 6;
@@ -259,7 +259,7 @@ void ChatSession::DoCommunicateInRoom()
       {
         num = 0;
         printf("enter file name : ");
-        std::cin.getline(line, BUF_SIZE);
+        cin.getline(line, BUF_SIZE);
         fp = fopen(line, "rb");
         if (fp == NULL)
         {
@@ -274,8 +274,8 @@ void ChatSession::DoCommunicateInRoom()
       strcpy(file_name_, line);
       strcpy(pkt_write.client_id, client_id_.c_str());
       pkt_write.type = 3;
-      std::srand(std::time(NULL));
-      // std::cout << "rand : " << rand() << std::endl;
+      srand(time(NULL));
+      // cout << "rand : " << rand() << endl;
       int port = 0;
       do
       {
@@ -284,7 +284,7 @@ void ChatSession::DoCommunicateInRoom()
       } while ((port + 10000) == atoi(port_.c_str()));
       pkt_write.port = port;
       Write(pkt_write);
-      std::thread t(&ChatSession::FileUpload, this, port);
+      thread t(&ChatSession::FileUpload, this, port);
       t.detach();
       // printf("here");
 
@@ -300,7 +300,7 @@ void ChatSession::DoCommunicateInRoom()
         pkt_write.file_transfer_check = 1;
         pkt_write.type = 5;
         Write(pkt_write);
-        // std::thread t(&ChatSession::file_download, this);
+        // thread t(&ChatSession::file_download, this);
         // t.detach();
         // file_transfer();
         file = 0;
@@ -316,7 +316,7 @@ void ChatSession::DoCommunicateInRoom()
       }
       memset(line, 0, strlen(line));
       printf("please input #y(#Y) or #n(#N) : ");
-      std::cin.getline(line, BUF_SIZE);
+      cin.getline(line, BUF_SIZE);
     }
     pkt_write.type = 2;
     Write(pkt_write);

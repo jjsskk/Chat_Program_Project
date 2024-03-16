@@ -16,7 +16,7 @@ void ChatSession::DoRead()
 { //// be careful that you use async_read!! -> this method only read buffer when buffer filled by write data .if otherwise, don't read
     boost::asio::async_read(socket_,
                             boost::asio::buffer(pkt_read, sizeof(struct packet)),
-                            [this](boost::system::error_code ec, std::size_t /*length*/)
+                            [this](boost::system::error_code ec, size_t /*length*/)
                             {
                                 if (!ec)
                                 {
@@ -41,9 +41,9 @@ void ChatSession::DoRead()
                                     else if (pkt_read->type == 1) // client enter room and read all username
                                     {
 
-                                        // std::cout.write(read_msg_.body(), read_msg_.body_length());
-                                        // std::cout << "Welcome to " << selectd_room_ << " room!!!" << std::endl;
-                                        std::cout << pkt_read->all_name << std::endl;
+                                        // cout.write(read_msg_.body(), read_msg_.body_length());
+                                        // cout << "Welcome to " << selectd_room_ << " room!!!" << endl;
+                                        cout << pkt_read->all_name << endl;
                                         mtx_room.lock();
                                         room = 1;
                                         mtx_room.unlock();
@@ -51,8 +51,8 @@ void ChatSession::DoRead()
                                     }
                                     else if (pkt_read->type == 2) // clint enter room and read new client name
                                     {
-                                        // std::cout << "Welcome to " << selectd_room_ << " room!!!" << std::endl;
-                                        std::cout << pkt_read->client_id << " has joined" << std::endl;
+                                        // cout << "Welcome to " << selectd_room_ << " room!!!" << endl;
+                                        cout << pkt_read->client_id << " has joined" << endl;
                                         // mtx_room.lock();
                                         // room = 1;
                                         // mtx_room.unlock();
@@ -61,7 +61,7 @@ void ChatSession::DoRead()
                                     else if (pkt_read->type == 3) // client read msg from server
                                     {
                                         // if(strcmp(pkt_read->client_id,client_id_.c_str()))
-                                        std::cout << "[" << pkt_read->client_id << "] : " << pkt_read->msg << std::endl;
+                                        cout << "[" << pkt_read->client_id << "] : " << pkt_read->msg << endl;
                                         DoRead();
                                     }
                                     else if (pkt_read->type == 4) // client read msg about whether he want to receive file from server
@@ -97,13 +97,13 @@ void ChatSession::DoRead()
                                     else if (pkt_read->type == 6) // cliet read client info leaved this room
                                     {
                                         // if(strcmp(pkt_read->client_id,client_id_.c_str()))
-                                        std::cout << pkt_read->client_id << " has left this room." << std::endl;
+                                        cout << pkt_read->client_id << " has left this room." << endl;
                                         DoRead();
                                     }
                                 }
                                 else
                                 {
-                                    std::cerr << "Exception: " << ec.message() << "\n";
+                                    cerr << "Exception: " << ec.message() << "\n";
 
                                     socket_.close();
                                     exit(EXIT_FAILURE);
@@ -115,7 +115,7 @@ void ChatSession::DoWrite()
 {
     boost::asio::async_write(socket_,
                              boost::asio::buffer(&(write_msgs_.front()), sizeof(struct packet)),
-                             [this](boost::system::error_code ec, std::size_t /*length*/)
+                             [this](boost::system::error_code ec, size_t /*length*/)
                              {
                                  if (!ec)
                                  {
@@ -127,7 +127,7 @@ void ChatSession::DoWrite()
                                  }
                                  else
                                  {
-                                     std::cerr << "Exception: " << ec.message() << "\n";
+                                     cerr << "Exception: " << ec.message() << "\n";
 
                                      socket_.close();
                                  }

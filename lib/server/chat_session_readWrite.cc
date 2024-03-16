@@ -1,87 +1,76 @@
 #include "chat_session_server.h"
 
-void ChatSession::DoRead() // type = 0->read created room name and client_id
-                             //  or type =1 ->read existed room name and room_id and client_id
+void ChatSession::DoRead()
 {
   auto self(shared_from_this());
   boost::asio::async_read(socket_,
                           boost::asio::buffer(pkt_, sizeof(struct packet)),                  // header length만큼만 읽겠다
-                          [this, self](boost::system::error_code ec, std::size_t /*length*/) // 나머지 body length는 buffer에 남음-
+                          [this, self](boost::system::error_code ec, size_t /*length*/) // 나머지 body length는 buffer에 남음-
                           {
                             if (!ec)
                             {
                               if (pkt_->type == 0) // sever read created roomname and client id
                               {
-                                std::cout << " read selectd room name :" << pkt_->selected_roomname << std::endl;
+                                cout << " read selectd room name :" << pkt_->selected_roomname << endl;
                                 client_id_.clear();
                                 client_id_.append(pkt_->client_id);
-                                // client_id_+=std::c_str(pkt_->client_id);
-                                std::cout << client_id_ << " connected" << std::endl;
+                                // client_id_+=c_str(pkt_->client_id);
+                                cout << client_id_ << " connected" << endl;
                                 DoCreateRoom();
                                 NotifyCreatedRoom();
                                 DoRead();
                               }
                               else if (pkt_->type == 1) // server read selected roomname(already existed) and client_id
                               {
-                                std::cout << " read selectd room name :" << pkt_->selected_roomname << std::endl;
+                                cout << " read selectd room name :" << pkt_->selected_roomname << endl;
                                 client_id_.clear();
                                 client_id_.append(pkt_->client_id);
-                                std::cout << client_id_ << " connected" << std::endl;
+                                cout << client_id_ << " connected" << endl;
                                 DoEnterRoom();
                                 DoRead();
                               }
                               else if (pkt_->type == 2) // server read msg from client
                               {
-                                std::cout << " msg :" << pkt_->msg << std::endl;
+                                cout << " msg :" << pkt_->msg << endl;
                                 pkt_->type = 3;
                                 current_room_->Deliver(*pkt_); // server send msg to all member in room
                                 DoRead();
                               }
-                              else if (pkt_->type == 3) // server read upload file from client
+                              else if (pkt_->type == 3) // server read file information and new port number from client
+
                               {
 
                                 memset(file_name_, 0, sizeof(file_name_));
                                 strcpy(file_name_, pkt_->file_name);
                                 threadpool.emplace_back(&ChatSession::FileUpload, this, pkt_->port);
                                 threadpool.back().detach();
-                                // std::thread t(&ChatSession::FileUpload, this);
+                                // thread t(&ChatSession::FileUpload, this);
                                 // t.detach();
 
-                                // if(fp == NULL)
-                                // 	fp = fopen(file_name_, "wb");
-                                // // while((read_cnt=read(clnt_sd,buf,BUF_SIZE))!=0)
-                                // if(pkt_->end_read_size == -1 )
-                                // fwrite((void*)(pkt_->file_content),1,FILE_SIZE,fp);
-                                // else
-                                // {
-                                //   printf("end : %d\n",pkt_->end_read_size);
-                                // fwrite((void*)(pkt_->file_content),1,pkt_->end_read_size,fp);
-                                // fclose(fp);
-                                // fp = NULL;
-                                // }
                                 DoRead();
                               }
-                              else if (pkt_->type == 4) // server read file request from client
+                              else if (pkt_->type == 4) // read file information and notification that file upload is done from client
+
                               {
-                                // std::cout<<" msg :" << pkt_->msg<<std::endl;
+                                // cout<<" msg :" << pkt_->msg<<endl;
 
                                 pkt_->type = 4;
                                 memset(file_name_, 0, sizeof(file_name_));
                                 strcpy(file_name_, pkt_->file_name);
-                                current_room_->Deliver(*pkt_, shared_from_this()); // server send file read check msg to all member in room except himself
-                                // std::thread t(&ChatSession::file_transfer, this,(pkt_->port)+10000);
-                                //   t.detach();
+                                current_room_->Deliver(*pkt_, shared_from_this());
+                                 // server send a question asking if you want to download this file 
+                                 //to all participants in this room except file owner
 
                                 DoRead();
                               }
-                              else if (pkt_->type == 5) // server read ack about whether client want to receive file
+                              else if (pkt_->type == 5) // server read answer about whether client want to receive file
                               {
-                                // std::cout<<" msg :" << pkt_->msg<<std::endl;
+                                // cout<<" msg :" << pkt_->msg<<endl;
                                 memset(file_name_, 0, sizeof(file_name_));
                                 strcpy(file_name_, pkt_->file_name);
                                 if (pkt_->file_transfer_check == 1) // server send file to client saying 'yes'
                                 {
-                                  std::cout << file_name_ << std::endl;
+                                  cout << file_name_ << endl;
                                   // threadpool.emplace_back(&ChatSession::file_download,this);
                                   // threadpool.back().detach();
                                   fp = fopen(file_name_, "rb");
@@ -105,7 +94,6 @@ void ChatSession::DoRead() // type = 0->read created room name and client_id
                                       break;
                                     }
                                     Deliver(*pkt_);
-                                    // socket_.write_some(boost::asio::buffer(pkt_, sizeof(struct packet)));
                                   }
                                   fclose(fp);
                                 }
@@ -113,7 +101,7 @@ void ChatSession::DoRead() // type = 0->read created room name and client_id
                                 DoRead();
                               }
 
-                              else if (pkt_->type == 6)
+                              else if (pkt_->type == 6) //read news that one client left the room.
                               {
                                 current_room_->Leave(shared_from_this(), client_id_);
                                 pkt_->type = 6;
@@ -125,9 +113,8 @@ void ChatSession::DoRead() // type = 0->read created room name and client_id
                                 // Leave();
                                 Start();
                               }
-                              else if (pkt_->type == 7)
+                              else if (pkt_->type == 7)// read news that one client terminate chat program
                               {
-                                // printf("here\n");
                                 if (current_room_ != nullptr) // for client  unexpected close
                                 {
                                   current_room_->Leave(shared_from_this(), client_id_);
@@ -141,7 +128,7 @@ void ChatSession::DoRead() // type = 0->read created room name and client_id
                             }
                             else
                             {
-                              std::cerr << "Exception: " << ec.message() << "\n";
+                              cerr << "Exception: " << ec.message() << "\n";
                               if (current_room_ != nullptr) // for client  unexpected close
                               {
                                 current_room_->Leave(shared_from_this(), client_id_);
@@ -162,11 +149,10 @@ void ChatSession::DoWrite()
   auto self(shared_from_this());
   boost::asio::async_write(socket_,
                            boost::asio::buffer(&(write_msgs_.front()), sizeof(struct packet)),
-                           [this, self](boost::system::error_code ec, std::size_t /*length*/)
+                           [this, self](boost::system::error_code ec, size_t /*length*/)
                            {
                              if (!ec)
                              {
-                               // printf("hell\n");
                                write_msgs_.pop_front();
                                if (!write_msgs_.empty())
                                {
@@ -176,7 +162,7 @@ void ChatSession::DoWrite()
                              else
                              {
 
-                               std::cerr << "Exception: " << ec.message() << "\n";
+                               cerr << "Exception: " << ec.message() << "\n";
                                if (current_room_ != nullptr)
                                {
                                  current_room_->Leave(shared_from_this(), client_id_);
@@ -186,7 +172,6 @@ void ChatSession::DoWrite()
                                  current_room_->Deliver(*pkt_);
                                }
                                participants_life_.erase(shared_from_this());
-                               //  room_.Leave(shared_from_this());
                              }
                            });
 }

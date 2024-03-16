@@ -5,6 +5,7 @@
 #define BUF_SIZE 100
 #define NAME_SIZE 20
 #define FILE_SIZE 500
+using namespace std;
 
 struct packet
 {
@@ -22,9 +23,9 @@ struct packet
     int end_read_size;
     int port;
 };
-extern std::mutex mtx_list;
-extern std::mutex mtx_room;
-extern std::mutex mtx_file;
+extern mutex mtx_list;
+extern mutex mtx_room;
+extern mutex mtx_file;
 extern int list;
 extern int room;
 extern int file;

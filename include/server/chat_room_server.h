@@ -9,34 +9,35 @@
 #include "globalVariable.h"
 #include "struct_pkt.h"
 
+using namespace std;
+
 class ChatRoom
 {
 public:
-  ChatRoom(int room_id, std::string room_name);
+  ChatRoom(int room_id, string room_name);
   ~ChatRoom();
 
 public:
-  std::string GetRoomName();
+  string GetRoomName();
   int GetRoomId();
-  void Leave(chat_participant_ptr participant, std::string client_id);
-  void JoinUser(std::string client_id, std::shared_ptr<ChatParticipant> participant);
+  void Leave(chat_participant_ptr participant, string client_id);
+  void JoinUser(string client_id, shared_ptr<ChatParticipant> participant);
 
   void Deliver(struct packet &msg);
-  void Deliver(struct packet &msg, std::shared_ptr<ChatParticipant> myself);
-  std::string GetAllClientId(std::string client_id);
+  void Deliver(struct packet &msg, shared_ptr<ChatParticipant> myself);
+  string GetAllClientId(string client_id);
 
 private: 
-  std::list<std::string> clientid_list_;
-  std::set<chat_participant_ptr> participants_;      // client_id
-  std::set<chat_participant_ptr> participants_file_; // client_id
+  list<string> clientid_list_;
+  set<chat_participant_ptr> participants_;      // client_id
   enum
   {
     max_recent_msgs = 100
   };
-  std::deque<struct packet> recent_msgs_; // 방안에서 최근 read받은 msg 저장
+  deque<struct packet> recent_msgs_; // 방안에서 최근 read받은 msg 저장
   int room_id_;
-  std::string room_name_;
-  std::string namelist_;
+  string room_name_;
+  string namelist_;
 };
 
 #endif

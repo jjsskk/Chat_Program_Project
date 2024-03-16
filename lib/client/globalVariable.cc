@@ -5,10 +5,10 @@
 #define FILE_SIZE 500
 
 
-std::mutex mtx_list;
-std::mutex mtx_room;
-std::mutex mtx_file;
-// std::mutex mtx_room_out;
+mutex mtx_list;
+mutex mtx_room;
+mutex mtx_file;
+// mutex mtx_room_out;
 int list = 0;
 int room = 0;
 int file = 0;
