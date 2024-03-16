@@ -40,6 +40,8 @@ CMake suite maintained and supported by Kitware (kitware.com/cmake).
 
 - When a file is uploaded to the server, the server asks the clients participating in the chat room whether they want to receive the file, and sends the file only to those who want to receive it.
 
+![alt text](./img/image-3.png)
+
 - Clients can send and receive conversations while files are being transferred.
 
 - The server run based on Boost.Asio as a whole without creating new thread and creating new socket.
