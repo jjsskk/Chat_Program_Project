@@ -73,6 +73,7 @@ nproc # check the number of core on your computer
 make -j4
 cd bin
 ```
+- If you want to test file transfers, never run the server program and all client programs in the same folder(ex: bin).
 
 ```
 ./chat_client <host> <port> <ID>
