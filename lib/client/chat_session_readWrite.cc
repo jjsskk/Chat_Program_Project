@@ -27,53 +27,52 @@ void ChatSession::DoRead()
                                         {
                                             memset(pkt_read, 0, sizeof(struct packet));
                                             DoRead();
+                                            return;
                                         }
-                                        else
-                                        {
-                                            if (list == 1)
-                                                DisplayRoomList();
-                                            mtx_list.lock();
-                                            list = 1;
-                                            mtx_list.unlock();
-                                            DoRead();
-                                        }
-                                    }
-                                    else if (pkt_read->type == 1) // client enter room and read all username
-                                    {
 
-                                        // cout.write(read_msg_.body(), read_msg_.body_length());
-                                        // cout << "Welcome to " << selectd_room_ << " room!!!" << endl;
+                                        if (list == 1)
+                                            DisplayRoomList();
+                                        mtx_list.lock();
+                                        list = 1;
+                                        mtx_list.unlock();
+                                        DoRead();
+                                        return;
+                                    }
+                                    if (pkt_read->type == 1) // client enter room and read all username
+                                    {
+                            
                                         cout << pkt_read->all_name << endl;
                                         mtx_room.lock();
                                         room = 1;
                                         mtx_room.unlock();
                                         DoRead();
+                                        return;
                                     }
-                                    else if (pkt_read->type == 2) // clint enter room and read new client name
+                                    if (pkt_read->type == 2) // clint enter room and read new client name
                                     {
-                                        // cout << "Welcome to " << selectd_room_ << " room!!!" << endl;
                                         cout << pkt_read->client_id << " has joined" << endl;
                                         // mtx_room.lock();
                                         // room = 1;
                                         // mtx_room.unlock();
                                         DoRead();
+                                        return;
                                     }
-                                    else if (pkt_read->type == 3) // client read msg from server
+                                    if (pkt_read->type == 3) // client read msg from server
                                     {
-                                        // if(strcmp(pkt_read->client_id,client_id_.c_str()))
                                         cout << "[" << pkt_read->client_id << "] : " << pkt_read->msg << endl;
                                         DoRead();
+                                        return;
                                     }
-                                    else if (pkt_read->type == 4) // client read msg about whether he want to receive file from server
+                                    if (pkt_read->type == 4) // client read msg about whether he want to receive file from server
                                     {
                                         file = 1; // do_communicate_room() method use this varibale to controll input from client
                                         memset(file_name_, 0, sizeof(file_name_));
                                         strcpy(file_name_, pkt_read->file_name);
                                         printf("!!!'%s' want to transfer file '%s' to you.\n!!!If you want to receive this file, please input #y(#Y) or otherwise, input #n(#N)\n", pkt_read->client_id, pkt_read->file_name);
-                                        // pkt_read->type = 4;
                                         DoRead();
+                                        return;
                                     }
-                                    else if (pkt_read->type == 5) // client said 'yes' read file from sever
+                                    if (pkt_read->type == 5) // client said 'yes' read file from sever
                                     {
                                         if (fp == NULL)
                                             fp = fopen(file_name_, "wb");
@@ -93,12 +92,13 @@ void ChatSession::DoRead()
 
                                         // pkt_read->type = 4;
                                         DoRead();
+                                        return;
                                     }
-                                    else if (pkt_read->type == 6) // cliet read client info leaved this room
+                                    if (pkt_read->type == 6) // cliet read client info leaved this room
                                     {
-                                        // if(strcmp(pkt_read->client_id,client_id_.c_str()))
                                         cout << pkt_read->client_id << " has left this room." << endl;
                                         DoRead();
+                                        return;
                                     }
                                 }
                                 else

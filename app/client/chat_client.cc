@@ -1,12 +1,10 @@
 #include <cstdlib>
-#include <deque>
 #include <iostream>
 #include <thread>
-#include <boost/asio.hpp>
 
 #include "globalVariable.h"
-
 #include "chat_session_client.h"
+
 using namespace std;
 using work_guard_type = boost::asio::executor_work_guard<boost::asio::io_service::executor_type>;
 
@@ -41,8 +39,7 @@ int main(int argc, char *argv[])
       mtx_list.lock();
       list = 0;
       mtx_list.unlock();
-      //  t.join();
-      //   printf("what the fuck\n");
+
       while (room == 0) // globla variable
       {
         // printf("0");

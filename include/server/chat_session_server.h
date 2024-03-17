@@ -52,9 +52,7 @@ private:
   char file_name_[20];
   FILE *fp = NULL;
   vector<thread> threadpool;
-  // shared_ptr<ChatSession> session_=shared_from_this();
-  // 서버가 돌아가는 동안에는 계속 살아있음!! 즉 누군가 방을 만든 시점부터
-  // 내용이 msg 저장됨 ->즉 접속한 새로운 유저는 이방 정보(객체)를 계속 가져감 접속할떄마다 새로 방 만들어서 가는게 x
+
 };
 
 #endif
